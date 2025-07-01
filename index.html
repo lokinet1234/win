@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Spin Slots</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #6d28d9, #8b5cf6); /* Purple 700 to Purple 500 */
+            color: #f8fafc; /* Slate 50 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars from background */
+        }
+        .slot-machine {
+            background-color: #1e293b; /* Slate 800 */
+            border: 8px solid #facc15; /* Amber 400 */
+            border-radius: 2rem; /* Large rounded corners */
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .reels-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .reel {
+            background-color: #334155; /* Slate 700 */
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem; /* Large emoji size */
+            border-radius: 0.75rem; /* Rounded corners for reels */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+            overflow: hidden; /* Hide overflowing symbols during spin */
+            transition: background-color 0.3s ease;
+        }
+        .reel-symbol {
+            animation: spin-animation 0.5s ease-out forwards; /* Animation for initial symbol appearance */
+        }
+
+        /* Keyframes for spinning effect */
+        @keyframes spin-animation {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .spin-button {
+            background: linear-gradient(to bottom, #ef4444, #dc2626); /* Red 500 to Red 600 */
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 1rem 3rem;
+            border-radius: 9999px; /* Fully rounded */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+        .spin-button:hover {
+            background: linear-gradient(to bottom, #dc2626, #b91c1c); /* Darker red on hover */
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.5), 0 6px 8px -3px rgba(0, 0, 0, 0.3);
+        }
+        .spin-button:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 5px 10px -2px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        .spin-button:disabled {
+            background: #9ca3af; /* Gray 400 */
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .message-box {
+            background-color: #334155; /* Slate 700 */
+            color: #f8fafc; /* Slate 50 */
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .credits-display {
+            background-color: #facc15; /* Amber 400 */
+            color: #1e293b; /* Slate 800 */
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slot-machine">
+        <h1 class="text-4xl font-bold mb-6 text-yellow-300 drop-shadow-md">Lucky Spin Slots</h1>
+
+        <div class="credits-display" id="creditsDisplay">
+            Credits: 100
+        </div>
+
+        <div class="reels-container">
+            <div class="reel" id="reel1"></div>
+            <div class="reel" id="reel2"></div>
+            <div class="reel" id="reel3"></div>
+        </div>
+
+        <button class="spin-button" id="spinButton">SPIN</button>
+
+        <div class="message-box" id="messageBox">
+            Welcome! Click SPIN to play.
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
+        const spinButton = document.getElementById('spinButton');
+        const creditsDisplay = document.getElementById('creditsDisplay');
+        const messageBox = document.getElementById('messageBox');
+
+        // Define slot machine symbols (emojis for visual appeal)
+        const symbols = ['🍒', '🍋', '🔔', '⭐', '💎', '🍀'];
+        // Define winning combinations and their payouts
+        const payouts = {
+            '🍒🍒🍒': 50,
+            '🍋🍋🍋': 40,
+            '🔔🔔🔔': 30,
+            '⭐⭐⭐': 25,
+            '💎💎💎': 100, // Jackpot!
+            '🍀🍀🍀': 75,
+            // Two matching symbols (e.g., two cherries) could also give a small payout
+            // For simplicity, we'll only check for three matching symbols
+        };
+
+        // Initial game state
+        let credits = 100;
+        const spinCost = 10;
+        const spinDuration = 2000; // milliseconds
+
+        /**
+         * Updates the credits displayed on the screen.
+         */
+        function updateCreditsDisplay() {
+            creditsDisplay.textContent = `Credits: ${credits}`;
+        }
+
+        /**
+         * Displays a message to the user in the message box.
+         * @param {string} message - The message to display.
+         * @param {string} type - 'win', 'lose', 'info'. Changes message box color.
+         */
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('bg-green-700', 'bg-red-700', 'bg-slate-700'); // Reset colors
+            if (type === 'win') {
+                messageBox.classList.add('bg-green-700');
+            } else if (type === 'lose') {
+                messageBox.classList.add('bg-red-700');
+            } else {
+                messageBox.classList.add('bg-slate-700');
+            }
+        }
+
+        /**
+         * Generates a random symbol from the available symbols.
+         * @returns {string} A random symbol emoji.
+         */
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+
+        /**
+         * Renders a symbol in a given reel element.
+         * @param {HTMLElement} reelElement - The DOM element for the reel.
+         * @param {string} symbol - The symbol emoji to display.
+         */
+        function renderSymbol(reelElement, symbol) {
+            reelElement.innerHTML = `<span class="reel-symbol">${symbol}</span>`;
+        }
+
+        /**
+         * Simulates the spinning of a single reel.
+         * @param {HTMLElement} reelElement - The DOM element for the reel.
+         * @returns {Promise<string>} A promise that resolves with the final symbol after spinning.
+         */
+        function spinReel(reelElement) {
+            return new Promise(resolve => {
+                let spinInterval;
+                let spinCount = 0;
+                const totalSpins = 20; // Number of intermediate symbols shown during spin
+
+                spinInterval = setInterval(() => {
+                    const currentSymbol = getRandomSymbol();
+                    renderSymbol(reelElement, currentSymbol);
+                    spinCount++;
+
+                    if (spinCount >= totalSpins) {
+                        clearInterval(spinInterval);
+                        const finalSymbol = getRandomSymbol(); // Get the actual final symbol
+                        renderSymbol(reelElement, finalSymbol);
+                        resolve(finalSymbol);
+                    }
+                }, spinDuration / totalSpins); // Adjust interval for smoother or faster spin
+            });
+        }
+
+        /**
+         * Checks the result of the spin and updates credits.
+         * @param {string[]} results - An array of the symbols on the reels.
+         */
+        function checkResult(results) {
+            const resultString = results.join('');
+            let winAmount = 0;
+            let message = "No win this time. Try again!";
+            let messageType = 'lose';
+
+            // Check for exact matches (e.g., '🍒🍒🍒')
+            if (payouts[resultString]) {
+                winAmount = payouts[resultString];
+                message = `JACKPOT! You won ${winAmount} credits! 🎉`;
+                messageType = 'win';
+            } else if (results[0] === results[1] && results[1] === results[2]) {
+                // This case is covered by the exact matches above, but good for general 3-of-a-kind logic
+                // If you had different payouts for generic 3-of-a-kind vs. specific symbols, this would be useful.
+            } else {
+                // Check for two matching symbols (e.g., '🍒🍒X')
+                if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
+                    winAmount = 5; // Small payout for two matching symbols
+                    message = `Two matching symbols! You won ${winAmount} credits.`;
+                    messageType = 'win';
+                }
+            }
+
+            credits += winAmount;
+            updateCreditsDisplay();
+            showMessage(message, messageType);
+        }
+
+        /**
+         * Handles the spin button click event.
+         */
+        async function handleSpin() {
+            if (credits < spinCost) {
+                showMessage("Not enough credits to spin! 😭", 'lose');
+                return;
+            }
+
+            credits -= spinCost;
+            updateCreditsDisplay();
+            showMessage("Spinning...", 'info');
+            spinButton.disabled = true; // Disable button during spin
+
+            // Spin all reels simultaneously
+            const reelPromises = [
+                spinReel(reel1),
+                spinReel(reel2),
+                spinReel(reel3)
+            ];
+
+            // Wait for all reels to finish spinning
+            const results = await Promise.all(reelPromises);
+
+            // Check the result and update game state
+            checkResult(results);
+
+            spinButton.disabled = false; // Re-enable button after spin
+        }
+
+        // Add event listener to the spin button
+        spinButton.addEventListener('click', handleSpin);
+
+        // Initial setup on page load
+        window.onload = function() {
+            updateCreditsDisplay();
+            // Render initial random symbols
+            renderSymbol(reel1, getRandomSymbol());
+            renderSymbol(reel2, getRandomSymbol());
+            renderSymbol(reel3, getRandomSymbol());
+        };
+    </script>
+</body>
+</html>
